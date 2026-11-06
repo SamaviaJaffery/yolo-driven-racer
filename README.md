@@ -19,6 +19,10 @@ The exact `follow_the_gap` package, maps, other models, experiment images, and b
 
 Metadata identifies YOLO26n segmentation, classes `0: Car` and `1: Wall`, and 640-pixel inference. The drivable-region node selects this model with confidence `0.05`. The cleaner sampled saved masks were from the September 1 rosbag4 experiment; their appearance also depends on mask cleanup and flood filling. The model embeds an AGPL-3.0 license notice.
 
+## Example masks
+
+[View four stages from the same rosbag4 scene](docs/images/rosbag4-frame-0100/README.md): blue YOLO detection, initial binary mask, geometric wall correction, and the final drivable region. The images share frame 100; their historical run sources and the exported intermediate are documented with the images.
+
 ## Restore the rosbags
 
 Install Git LFS first, then:

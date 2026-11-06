@@ -1,0 +1,45 @@
+{
+  "bag": "rosbag4",
+  "frame_number": 100,
+  "frame_metadata": {
+    "frame_number": 100,
+    "timestamp_ns": 1784750643809244061,
+    "header_frame_id": "camera_color_optical_frame",
+    "encoding": "rgb8",
+    "width": 640,
+    "height": 480,
+    "saved_blue_top200_mae": 1.3397265625
+  },
+  "model": "25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx",
+  "note": "The same camera scene/frame is compared across two historical runs of the same bag and model: August 29 run 18 and September 1 run 1. Stage 3 is an exported intermediate, not a separately saved historical image.",
+  "images": [
+    {
+      "filename": "01-blue-detection.jpg",
+      "source_relative_to_blaze_racer": "autonomy_ws/src/yolo_detection/2026-08-29/output_results_rosbags/rosbag4_25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx_18/output_results_100.jpg",
+      "method": "Unmodified saved YOLO blue segmentation overlay.",
+      "source_sha256": "e5919d9fd508684e905a76572fe207699f4b1eec8810e2f86b48c82c1a34b88f",
+      "output_sha256": "e5919d9fd508684e905a76572fe207699f4b1eec8810e2f86b48c82c1a34b88f"
+    },
+    {
+      "filename": "02-initial-mask.jpg",
+      "source_relative_to_blaze_racer": "autonomy_ws/src/yolo_detection/2026-08-29/output_results_rosbags/rosbag4_25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx_18/combined_image_100.jpg",
+      "method": "Unmodified saved initial binary obstacle mask.",
+      "source_sha256": "738d885e55fa876ac50dff752de1d0bdee8617c2ff6b0cabb4778d49a8fdb62f",
+      "output_sha256": "738d885e55fa876ac50dff752de1d0bdee8617c2ff6b0cabb4778d49a8fdb62f"
+    },
+    {
+      "filename": "03-geometric-correction.png",
+      "source_relative_to_blaze_racer": "autonomy_ws/src/yolo_detection/2026-09-01/output_results_rosbags/rosbag4_25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx_1/drivable_image_100.jpg",
+      "method": "Corrected obstacle mask extracted from saved final mask: grayscale >= 192 becomes white; all other pixels become black.",
+      "source_sha256": "8fcd93506517f94fbc3b8bf1b51e353e2aae2583268baf66855cad2be5bce894",
+      "output_sha256": "28b05b672edf0535ba5b4f9ec23ce0ac3b9de8ca630181d14c532f4f720f595f"
+    },
+    {
+      "filename": "04-drivable-region.jpg",
+      "source_relative_to_blaze_racer": "autonomy_ws/src/yolo_detection/2026-09-01/output_results_rosbags/rosbag4_25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx_1/drivable_image_100.jpg",
+      "method": "Unmodified saved final mask. White = obstacles; gray = drivable region; black = other area.",
+      "source_sha256": "8fcd93506517f94fbc3b8bf1b51e353e2aae2583268baf66855cad2be5bce894",
+      "output_sha256": "8fcd93506517f94fbc3b8bf1b51e353e2aae2583268baf66855cad2be5bce894"
+    }
+  ]
+}
