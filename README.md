@@ -1,15 +1,11 @@
 # YOLO Driven Racer
 
-ROS 2 source and selected test assets for camera-based autonomous racing, derived from [airacer-ucf/blaze_racer](https://github.com/airacer-ucf/blaze_racer). Upstream history and third-party license notices are retained.
-
 ## Included
 
 - `autonomy_ws/src`: `autonomy_core`, `yolo_detection`, `yolo_perception`, `follow_the_gap_crude`, and `slam_mapping`.
 - `subsystem_ws`: VESC drivers, camera nodes, command mux, and teleoperation.
-- The August 25, 150-epoch YOLO26n segmentation checkpoint at the repository root.
+- 150-epoch YOLO26n segmentation checkpoint at the repository root.
 - Rosbag4 and rosbag2, stored losslessly as gzip files in Git LFS.
-
-The exact `follow_the_gap` package, maps, other models, experiment images, and build outputs are excluded from the current tree. Original upstream history still contains the earlier planner and maps. `follow_the_gap_crude` is retained as the experimental camera-mask controller.
 
 ## Model
 
