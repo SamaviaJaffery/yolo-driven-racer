@@ -71,14 +71,4 @@ The node starts bag playback internally. Change the bag parameter to `rosbags/ro
 
 The subsystem entry point is `ros2 launch subsystem_stack bringup_launch.py`. The custom camera node publishes `/camera/color/image_raw`; remap it to the YOLO input `/camera/camera/color/image_raw` when using that camera.
 
-## Current status
 
-The selected source is preserved as saved. Standalone CPU ONNX inference succeeded, both SQLite bag databases were inspected, and compressed copies were verified losslessly. Full ROS execution and vehicle operation were not tested: `rclpy` and `cv_bridge` are unavailable in the packaging environment.
-
-Existing blockers to end-to-end operation:
-
-- `yolo_detection_algo.py`: `binary_mask()` and `drivable_mask()` do not return arrays, although the caller accesses `mask.shape`. Publication calls `msg2.tobytes()` on a ROS message. Empty-mask and empty-component paths also need handling.
-- `follow_the_gap_crude`: a ROS `Image` is passed to a NumPy planner, `min_clearance` is missing from the default parameters, and `cur_len` is used before initialization. Convert mask values into free space that excludes obstacles before planning.
-- `yolo_perception`: its default model is excluded here, and the live-input branch references undefined `self.params`. Validation utilities refer to historical models/images that are also excluded.
-
-The included model, bags, and workspaces cover the project assets. Dependencies and these code fixes are additionally needed for a working driving pipeline.
