@@ -1,7 +1,31 @@
-build
-install
-log
-__pycache__
-.claude
-context
-maps
+# ROS build products and local tooling
+build/
+install/
+log/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.claude/
+context/
+maps/
+
+# Original LiDAR planner excluded from this repository
+autonomy_ws/src/follow_the_gap/
+
+# Generated experiment outputs
+**/output_results*/
+autonomy_ws/src/yolo_*/20??-??-??/
+runs/
+Val_images/
+Val_labels/
+Val_output/
+
+# Restored bags are generated from the compressed LFS copies
+rosbags/**/*.db3
+rosbags/**/*.partial
+
+# Keep only the selected checkpoint at the repository root
+*.pt
+*.onnx
+!/25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx

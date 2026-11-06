@@ -37,24 +37,24 @@ DEFAULT_PARAMS = {
 }
 
 
-class FollowTheGapNode(BaseDriveNode):
+class FollowTheGapCrudeNode(BaseDriveNode):
     """Reactive gap-following node: subscribes to /scan, publishes /drive."""
 
     def __init__(self):
         """Initialise the base node and construct the planner."""
-        super().__init__('follow_the_gap_node', DEFAULT_PARAMS, uses_odom=False)
+        super().__init__('follow_the_gap_crude_node', DEFAULT_PARAMS, uses_odom=False, uses_camera=True, uses_lidar=False) #added this
         self.planner = FollowTheGapPlanner(self.params)
 
-    def compute_drive(self, scan_msg):
+    def compute_drive(self, image_msg):
         """Delegate to the planner; the base class handles publishing/stops."""
-        return self.planner.plan(
-            scan_msg.ranges, scan_msg.angle_min, scan_msg.angle_increment)
+
+        return self.planner.plan(image_msg)
 
 
 def main(args=None):
     """Spin the Follow-the-Gap node until interrupted."""
     rclpy.init(args=args)
-    node = FollowTheGapNode()
+    node = FollowTheGapCrudeNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

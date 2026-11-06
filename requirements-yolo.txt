@@ -1,0 +1,8 @@
+# Python inference dependencies; ROS packages are installed with rosdep.
+# Versions below match the environment used for the standalone ONNX smoke test.
+ultralytics==8.4.95
+onnxruntime==1.23.2
+numpy==1.26.4
+opencv-python==5.0.0.93
+Pillow==12.3.0
+matplotlib>=3.7

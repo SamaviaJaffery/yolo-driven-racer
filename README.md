@@ -1,243 +1,84 @@
-# Blaze Racer
+# YOLO Driven Racer
 
-A ROS 2 software stack for a small-scale autonomous racing platform. The repository is split into two independent ROS 2 workspaces: a hardware-facing **subsystem workspace** that brings up all drivers and teleoperation, and an **autonomy workspace** that houses the autonomous driving algorithms.
+ROS 2 source and selected test assets for camera-based autonomous racing, derived from [airacer-ucf/blaze_racer](https://github.com/airacer-ucf/blaze_racer). Upstream history and third-party license notices are retained.
 
->**Note that the stack was tailored to run on Ubuntu 20.04**
+## Included
 
----
+- `autonomy_ws/src`: `autonomy_core`, `yolo_detection`, `yolo_perception`, `follow_the_gap_crude`, and `slam_mapping`.
+- `subsystem_ws`: VESC drivers, camera nodes, command mux, and teleoperation.
+- The August 25, 150-epoch YOLO26n segmentation checkpoint at the repository root.
+- Rosbag4 and rosbag2, stored losslessly as gzip files in Git LFS.
 
-## Main Hardware
+The exact `follow_the_gap` package, maps, other models, experiment images, and build outputs are excluded from the current tree. Original upstream history still contains the earlier planner and maps. `follow_the_gap_crude` is retained as the experimental camera-mask controller.
 
-| Component | Model |
-|---|---|
-| Motor controller | VESC (connected via `/dev/sensors/vesc`) |
-| LiDAR | Hokuyo (connected via `urg_node`) |
-| Camera | Intel RealSense D435i (RGB stream only) |
-| Gamepad Controller | Logitech F-710 or PS4 DualShock |
+## Model
 
----
-
-## Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/airacer-ucf/blaze_racer.git
+```text
+25_08_runs_ep150_sz640_adamW_lr0.001_lrf_0.1_wd0.0005_Fz10_GS50_noauto_hsv_translate0.1_scale0.3_Coslr_fromtheinitialweight.onnx
 ```
 
-### 2. Initialize rosdep (first-time only)
+Metadata identifies YOLO26n segmentation, classes `0: Car` and `1: Wall`, and 640-pixel inference. The drivable-region node selects this model with confidence `0.05`. The cleaner sampled saved masks were from the September 1 rosbag4 experiment; their appearance also depends on mask cleanup and flood filling. The model embeds an AGPL-3.0 license notice.
+
+## Restore the rosbags
+
+Install Git LFS first, then:
 
 ```bash
-sudo rosdep init
-rosdep update
+git lfs install
+git clone https://github.com/SamaviaJaffery/yolo-driven-racer.git
+cd yolo-driven-racer
+git lfs pull
+python3 scripts/restore_rosbags.py
 ```
 
-Might need to run `rosdep update --include-eol-distros` instead.
+Restore only one with `python3 scripts/restore_rosbags.py rosbag4`. SHA-256 verification reconstructs the original `.db3` files referenced by `metadata.yaml`.
 
----
+| Bag | Camera frames | Duration | Original size |
+| --- | ---: | ---: | ---: |
+| rosbag4 | 797 | 53 seconds | 711 MiB |
+| rosbag2 | 3,080 | 205 seconds | 2.67 GiB |
 
-## Running the Stack
+Both contain `/camera/camera/color/image_raw`. Rosbag4 also contains LiDAR and odometry; rosbag2 contains camera IMU messages. They were the top two in the previously counted named result folders.
 
-Open two terminals:
+Compression keeps each bag below the [GitHub Free/Pro LFS limit](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage). Ordinary Git files are limited to [100 MiB](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github). Restored bags need about 3.4 GiB in addition to compressed downloads.
 
-**Terminal 1 -- subsystem stack**
-```bash
-cd ~/blaze_racer/subsystem_ws
-source install/setup.bash
-ros2 launch subsystem_stack bringup_launch.py
-```
+## Dependencies and build
 
-**Terminal 2 -- autonomy**
-```bash
-cd ~/blaze_racer/autonomy_ws
-source install/setup.bash
-ros2 launch follow_the_gap follow_the_gap.launch.py
-```
-
-Hold the navigation deadman button (RB on Logitech F-710, R1 on PS4) to allow autonomous commands through the mux. Release it or hold the teleop deadman button to take manual control.
-
----
-
-## Autonomy Workspace
-
-The autonomy workspace contains the reactive planner that drives the car autonomously. It is independent of the subsystem workspace and can be built and run separately.
-
-### Build and launch
+A ROS 2 development environment, rosdep, and colcon are required. Source your installed ROS distribution before these commands. Python inference dependencies were smoke-tested with Python 3.10.
 
 ```bash
-cd ~/blaze_racer/autonomy_ws
+python3 -m pip install -r requirements-yolo.txt
+cd subsystem_ws
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
-ros2 launch follow_the_gap follow_the_gap.launch.py
-```
-
-The subsystem workspace must already be running (bringup launched) before starting the autonomy node, since it depends on `/scan` being published and `/drive` being consumed.
-
-### Autonomy Packages
-
-#### autonomy_core (shared library)
-
-`autonomy_core` holds the reusable scaffolding every algorithm builds on: a
-`BaseDriveNode` that handles the `/scan`→`/drive` ROS plumbing and safety stop,
-plus ROS-free `lidar_utils`. New algorithms subclass `BaseDriveNode` and
-implement a single `compute_drive` method — see `autonomy_ws/README.md` for the
-pattern. It ships no algorithm of its own.
-
-#### Follow the Gap algorithm
-
-The `follow_the_gap` package implements the Disparity Extender / Follow-the-Gap reactive planner. It processes raw LiDAR scans and publishes Ackermann drive commands in real time with no map or localization required. The gap-following logic lives in a pure, unit-tested `planner.py`; the node is a thin `BaseDriveNode` subclass.
-
----
-
-## Subsystem Workspace
-
-The subsystem workspace manages all hardware: the VESC drive-by-wire system, Hokuyo LiDAR, RealSense camera, joystick input, and command multiplexing.
-
-### Build and launch
-
-```bash
-cd ~/blaze_racer/subsystem_ws
+cd ../autonomy_ws
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
-ros2 launch subsystem_stack bringup_launch.py
+cd ..
 ```
 
-### Packages
+Initialize rosdep first if your ROS environment has not already done so. ROS dependencies include `rclpy`, `cv_bridge`, `sensor_msgs`, `nav_msgs`, `ackermann_msgs`, `vision_msgs`, and the declared subsystem drivers. Hardware setup is described in `subsystem_ws/README.md`.
 
-**subsystem_stack** -- Master package. Contains the single `bringup_launch.py` that starts the full driver stack and all parameter files consumed by every other node.
-
-**realsense_rgb** -- Publishes the D435i's color stream as `sensor_msgs/Image` via V4L2, with no depth or point-cloud overhead. Can be launched standalone or is included automatically by the bringup.
+After fixing the runtime blockers below, run from the repository root with both overlays sourced:
 
 ```bash
-ros2 launch realsense_rgb realsense_rgb.launch.py
+ros2 run yolo_detection yolo_detection_node --ros-args -p use_rosbags:=true -p rosbag_dir_name:=rosbags/rosbag4
 ```
 
-**camera_capture** -- Listens to the `/joy` topic and saves timestamped photos and videos on button press. Intended button mapping: X to take a photo, Triangle to start recording, Square to stop recording. Captures go to `~/captures` by default. Launch standalone with:
+The node starts bag playback internally. Change the bag parameter to `rosbags/rosbag2` for the second recording. The annotation/tracking entry point is `ros2 run yolo_perception yolo_node`; explicitly pass `-p model_name:=<included checkpoint filename>` because its saved default selects a different model.
 
-```bash
-ros2 launch camera_capture camera_capture.launch.py
-```
+The subsystem entry point is `ros2 launch subsystem_stack bringup_launch.py`. The custom camera node publishes `/camera/color/image_raw`; remap it to the YOLO input `/camera/camera/color/image_raw` when using that camera.
 
-Both `realsense_rgb` and `camera_capture` are present in the bringup launch file but commented out. Uncomment the relevant lines in `bringup_launch.py` to include them automatically.
+## Current status
 
-**ackermann_mux** -- A priority-based multiplexer that arbitrates between teleop and autonomous drive commands. The autonomous `/drive` topic has lower priority than the human joystick input, so the operator can take control at any time.
+The selected source is preserved as saved. Standalone CPU ONNX inference succeeded, both SQLite bag databases were inspected, and compressed copies were verified losslessly. Full ROS execution and vehicle operation were not tested: `rclpy` and `cv_bridge` are unavailable in the packaging environment.
 
-**teleop_tools** -- Provides `joy_teleop`, `key_teleop`, and `mouse_teleop` nodes. The joystick teleop is the primary interface and is configured via `subsystem_stack/config/joy_teleop.yaml`.
+Existing blockers to end-to-end operation:
 
-**vesc** -- Low-level driver suite for the VESC motor controller. Consists of three sub-packages: `vesc_driver` (serial communication), `vesc_ackermann` (Ackermann-to-VESC and VESC-to-odometry conversion), and `vesc_msgs` (custom message definitions).
+- `yolo_detection_algo.py`: `binary_mask()` and `drivable_mask()` do not return arrays, although the caller accesses `mask.shape`. Publication calls `msg2.tobytes()` on a ROS message. Empty-mask and empty-component paths also need handling.
+- `follow_the_gap_crude`: a ROS `Image` is passed to a NumPy planner, `min_clearance` is missing from the default parameters, and `cur_len` is used before initialization. Convert mask values into free space that excludes obstacles before planning.
+- `yolo_perception`: its default model is excluded here, and the live-input branch references undefined `self.params`. Validation utilities refer to historical models/images that are also excluded.
 
-### Nodes launched by bringup
-
-The `bringup_launch.py` file starts the following nodes in order:
-
-1. `joy` -- joystick driver
-2. `joy_teleop` -- maps joystick axes and buttons to `AckermannDriveStamped` commands
-3. `ackermann_to_vesc_node` -- converts Ackermann commands to VESC motor and servo commands
-4. `vesc_to_odom_node` -- integrates VESC telemetry into wheel odometry
-5. `vesc_driver_node` -- low-level VESC serial interface
-6. `urg_node` -- Hokuyo LiDAR driver
-7. `ackermann_mux` -- priority multiplexer for command sources
-8. `static_transform_publisher` -- publishes the fixed TF from `base_link` to `laser` (x=0.27 m, z=0.11 m)
-
-The `throttle_interpolator` node (acceleration smoother) is present in the launch file but commented out. Enable it if smoother throttle ramps are needed (might need to troubleshoot it as well).
-
-### Deadman switch
-
-A deadman button must be held at all times for control inputs to pass through. Defaults:
-
-| Controller | Teleop | Navigation (autonomous) |
-|---|---|---|
-| Logitech F-710 | LB | RB |
-| PS4 DualShock | L1 | R1 |
-
-Button bindings are configurable in `subsystem_stack/config/joy_teleop.yaml`.
-
-### Joystick axis configuration
-
-Steering axis indices differ by controller. Set the correct index under `human_control -> drive-steering_angle` in `joy_teleop.yaml`:
-
-| Controller | Axis index |
-|---|---|
-| PS4 DualShock | 2 |
-| Logitech F-710 | 3 |
-
-To identify unknown axis mappings, run `ros2 topic echo /joy` and move the stick while watching which index in the `axes` array changes.
-
-### Topics
-
-**Subscribed by the driver stack**
-
-| Topic | Type | Description |
-|---|---|---|
-| `/drive` | `AckermannDriveStamped` | Autonomous navigation commands |
-
-**Published by the driver stack**
-
-| Topic | Type | Description |
-|---|---|---|
-| `/scan` | `LaserScan` | Hokuyo LiDAR scans |
-| `/odom` | `Odometry` | Wheel odometry from VESC |
-| `/sensors/imu/raw` | `Imu` | Raw IMU data from VESC |
-| `/sensors/core` | `VescStateStamped` | VESC telemetry |
-
-**Published by the camera stack**
-
-| Topic | Type | Description |
-|---|---|---|
-| `/camera/color/image_raw` | `Image` | RealSense D435i RGB stream |
-
-### Key configuration files
-
-| File | Purpose |
-|---|---|
-| `subsystem_stack/config/vesc.yaml` | VESC speed/servo gains, port, safety limits, odometry frame |
-| `subsystem_stack/config/joy_teleop.yaml` | Joystick axis/button mappings and deadman configuration |
-| `subsystem_stack/config/sensors.yaml` | Hokuyo LiDAR connection parameters |
-| `subsystem_stack/config/mux.yaml` | Ackermann mux topic priorities |
-| `subsystem_stack/config/realsense.yaml` | RealSense node parameters |
-| `camera_capture/config/camera_capture.yaml` | Save directory, button indices, codec, FPS |
-
-### VESC calibration parameters
-
-The VESC config uses linear mappings to convert between SI units and hardware values:
-
-```
-erpm = speed_to_erpm_gain * speed_m_s + speed_to_erpm_offset
-servo = steering_angle_to_servo_gain * angle_rad + steering_angle_to_servo_offset
-```
-
-Current defaults (tune for your specific vehicle):
-
-| Parameter | Value |
-|---|---|
-| `speed_to_erpm_gain` | 4614.0 |
-| `speed_to_erpm_offset` | 0.0 |
-| `steering_angle_to_servo_gain` | -1.2135 |
-| `steering_angle_to_servo_offset` | 0.5304 |
-| `servo_min` / `servo_max` | 0.15 / 0.85 |
-| `wheelbase` | 0.25 m |
-
----
-
-## External Dependencies
-
-| Package | Purpose | Source |
-|---|---|---|
-| `ackermann_msgs` | Ackermann command message type | https://index.ros.org/r/ackermann_msgs |
-| `urg_node` | Hokuyo LiDAR driver | https://index.ros.org/p/urg_node |
-| `joy` | Joystick driver | https://index.ros.org/p/joy |
-| `teleop_tools` | Joystick/key/mouse teleop | https://index.ros.org/p/teleop_tools |
-| `vesc` | VESC motor controller driver | https://github.com/f1tenth/vesc/tree/ros2 |
-| `ackermann_mux` | Priority command multiplexer | https://github.com/f1tenth/ackermann_mux |
-| `cv_bridge` | OpenCV / ROS image bridge | https://index.ros.org/p/cv_bridge |
-| `python3-opencv` | OpenCV Python bindings | `sudo apt install python3-opencv` |
-
-Install all ROS dependencies at once from within each workspace's root:
-
-```bash
-rosdep install --from-paths src --ignore-src -r -y
-```
-
----
+The included model, bags, and workspaces cover the project assets. Dependencies and these code fixes are additionally needed for a working driving pipeline.

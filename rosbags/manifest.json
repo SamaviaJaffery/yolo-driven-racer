@@ -1,0 +1,14 @@
+{
+  "rosbag4": {
+    "filename": "rosbag2_2026_07_22-20_03_57_0.db3",
+    "sha256": "5063ae126e41e17a5097c66fde270cf9571a57dded3428fcdd2695cc86e88a8c",
+    "size_bytes": 746000384,
+    "compressed_size_bytes": 302763676
+  },
+  "rosbag2": {
+    "filename": "rosbag2_2026_07_13-21_08_42_0.db3",
+    "sha256": "23268eb9da0a10daa4d38bc18cc37b56733f5e36197f58321245749f0e2842bd",
+    "size_bytes": 2866442240,
+    "compressed_size_bytes": 1443559578
+  }
+}
