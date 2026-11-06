@@ -37,7 +37,7 @@ Restore only one with `python3 scripts/restore_rosbags.py rosbag4`. SHA-256 veri
 | rosbag4 | 797 | 53 seconds | 711 MiB |
 | rosbag2 | 3,080 | 205 seconds | 2.67 GiB |
 
-Both contain `/camera/camera/color/image_raw`. Rosbag4 also contains LiDAR and odometry; rosbag2 contains camera IMU messages. They were the top two in the previously counted named result folders.
+Both contain `/camera/camera/color/image_raw`. Rosbag4 also contains LiDAR and odometry; rosbag2 contains camera IMU messages. 
 
 Compression keeps each bag below the [GitHub Free/Pro LFS limit](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage). Ordinary Git files are limited to [100 MiB](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github). Restored bags need about 3.4 GiB in addition to compressed downloads.
 
