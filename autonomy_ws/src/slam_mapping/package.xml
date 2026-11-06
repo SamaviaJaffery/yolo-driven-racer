@@ -8,7 +8,7 @@
     (manually or autonomously) and automatically saves the occupancy-grid map
     once a loop closure (completed lap back to start) is detected.
   </description>
-  <maintainer email="israelcharlesic10@gmail.com">Israel Charles</maintainer>
+  <maintainer email="samaviajaffery@gmail.com">Samavia Jaffery</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>

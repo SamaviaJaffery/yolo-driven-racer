@@ -19,8 +19,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Israel Charles',
-    maintainer_email='israelcharlesic10@gmail.com',
+    maintainer='Samavia Jaffery',
+    maintainer_email='samaviajaffery@gmail.com',
     description='Joystick-controlled camera capture',
     license='MIT',
     extras_require={

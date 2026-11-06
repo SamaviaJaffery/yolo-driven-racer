@@ -4,7 +4,7 @@
   <name>autonomy_core</name>
   <version>0.0.0</version>
   <description>Shared base classes and LiDAR utilities for autonomy algorithms</description>
-  <maintainer email="israelcharlesic10@gmail.com">Israel Charles</maintainer>
+  <maintainer email="samaviajaffery@gmail.com">Samavia Jaffery</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>

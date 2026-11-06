@@ -4,7 +4,7 @@
   <name>subsystem_stack</name>
   <version>0.0.1</version>
   <description>Onboard drivers for vesc and sensors for small-scale vehicles. Based on RoboRacer (F1Tenth) stack.</description>
-  <maintainer email="israelcharlesic10@gmail.com">Israel Charles</maintainer>
+  <maintainer email="samaviajaffery@gmail.com">Samavia Jaffery</maintainer>
   <license>MIT</license>
 
   <depend>ackermann_msgs</depend>
